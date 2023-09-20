@@ -1,0 +1,5 @@
+- name: Bring up the ens7 nic
+  shell: ip link set dev ens7 up
+
+- name: apply the ens7 changes
+  shell: netplan generate ens7 && netplan apply

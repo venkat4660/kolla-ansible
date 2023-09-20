@@ -1,0 +1,4 @@
+- name: Create the volume groups
+  community.general.lvg:
+    vg: cinder-volumes
+    pvs: /dev/vdb,/dev/vdc,/dev/vdd

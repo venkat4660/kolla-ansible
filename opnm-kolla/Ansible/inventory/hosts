@@ -1,0 +1,17 @@
+[deployment_nodes]
+10.103.4.25
+
+[compute_nodes]
+10.103.4.192
+10.103.4.114
+
+[controller_nodes]
+10.103.4.208
+10.103.4.18
+
+[storage_nodes]
+10.103.4.120
+
+[all:vars]
+ansible_user="{{remote_user}}"
+ansible_ssh_common_args='-o StrictHostKeyChecking=no'

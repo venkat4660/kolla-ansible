@@ -1,0 +1,70 @@
+- name: Create /etc/kolla directory.
+  ansible.builtin.file:
+    path: /etc/kolla
+    state: directory
+    owner: root
+    group: root
+
+- name: Copy the kolla file to /etc/kolla
+  ansible.builtin.copy:
+    remote_src: true
+    src: /usr/local/share/kolla-ansible/etc_examples/kolla/
+    dest: /etc/kolla/
+
+- name: Copy the kolla file to /etc/kolla
+  ansible.builtin.copy:
+    remote_src: true
+    src: /usr/local/share/kolla-ansible/ansible/inventory/
+    dest: /etc/kolla/
+
+- name: Kolla-genpwd generates passwords
+  ansible.builtin.shell: kolla-genpwd
+
+- name: Backup the kolla directory file to /tmp
+  ansible.builtin.copy:
+    src: /etc/kolla/
+    dest: /tmp/
+    remote_src: yes
+
+- name: Read host details from file
+  include_vars:
+    file: ../../../inventory/group_vars/multinode.yml
+    name: host_details
+
+- name: Generate inventory content from template
+  template:
+    src: multinode.j2
+    dest: /etc/kolla/multinode
+
+- name: Copy the globals.yml file.
+  ansible.builtin.copy:
+    src: globals.yml
+    dest: /etc/kolla/
+    mode: '0644' #noqa
+
+- name: Commenting the 127.0.1.1 in /etc/hosts in /usr/local/share/kolla-ansible/ansible/roles/baremetal/tasks/pre-install.yml
+  ansible.builtin.shell: sed -i '19,25s/^/#/' /usr/local/share/kolla-ansible/ansible/roles/baremetal/tasks/pre-install.yml
+
+- name: Collect the gathering facts
+  ansible.builtin.shell: ansible all -i multinode -m setup
+  ignore_errors: true
+
+#- name: Bootstrap-servers using kolla-ansible
+#  ansible.builtin.shell: kolla-ansible -i /etc/kolla/multinode bootstrap-servers -e enable_docker_repo=no
+#  ignore_errors: true
+
+#- name: Kolla ansible prechecks
+#  ansible.builtin.shell: kolla-ansible -i /etc/kolla/multinode prechecks
+#  ignore_errors: true
+
+#- name: Kolla ansible deploy
+#  ansible.builtin.shell: kolla-ansible -i /etc/kolla/multinode deploy
+#  ignore_errors: true
+
+#- name: Kolla ansible post-deploy
+#  ansible.builtin.shell: kolla-ansible -i multinode post-deploy
+
+#- name: Install the python3-openstackclient
+#  apt:
+#    name: python3-openstackclient
+#    state: present

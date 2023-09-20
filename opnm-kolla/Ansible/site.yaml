@@ -1,0 +1,41 @@
+- name: Ubuntu repos configuration & Install the required packages and setup
+  hosts: all
+  become: true
+  gather_facts: false
+  roles:
+  - name: repos
+  - name: packages
+  tags: repos
+
+- name: Configure the  Deployment node
+  hosts: deployment_nodes
+  become: true
+  gather_facts: false
+  roles:
+  - name: deployment-node
+  tags: deployment_node
+
+- name: Configure the storage node
+  hosts: storage_nodes
+  become: true
+  gather_facts: false
+  roles: 
+    - name: storage-node
+  tags: storage_nodes
+
+#- name: Configure the Compute&Controller node
+#  hosts: all
+#  become: true
+#  gather_facts: false
+#  roles: 
+#    - name: compute-controller
+#  tags: compute-controller
+
+- name: Openstack Deployment using kolla-ansible
+  hosts: deployment_nodes
+  become: true
+  gather_facts: false
+  roles:
+   - name: kolla-ansible
+  tags: kolla-ansible
+

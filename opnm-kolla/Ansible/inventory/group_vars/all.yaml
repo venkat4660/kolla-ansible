@@ -1,0 +1,31 @@
+domain:
+  search: netcracker.com
+  nameservers:
+  - 10.112.1.1
+  - 10.112.1.2
+packages:
+  deb:
+  - lvm2
+  - net-tools
+  - libssl-dev
+  - libffi-dev
+  - python3-dev
+  - python3-pip
+  - gcc
+  - git
+  - docker
+  - docker-ce
+
+repo:
+  server: "http://reposrv.netcracker.com"
+  endpoint:
+    ubuntu: "sources.list.d/distr"
+  file:
+    ubuntu:
+    - netcracker_ubuntu_focal-backports.list
+    - netcracker_ubuntu_focal-security.list
+    - netcracker_ubuntu_focal-updates.list
+    - netcracker_ubuntu_focal.list
+reposerver_ubuntu: "{{ repo.server }}/{{ repo.endpoint.ubuntu }}/"
+remote_user: ubuntu
+#private_key_file: demo-keypair.pem

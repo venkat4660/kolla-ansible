@@ -1,0 +1,28 @@
+- name: Backup resolv.conf file
+  ansible.builtin.copy:
+    remote_src: true
+    src: /etc/resolv.conf
+    dest: /etc/resolv.conf-$(date +"%F:%T").bkp
+    mode: '0644' # noqa
+
+- name: Create resolv.conf from template
+  ansible.builtin.template:
+    src: resolv.conf.j2
+    dest: /etc/resolv.conf
+    mode: '0644' # noqa
+
+- name: Check if sources.list file exist ot not
+  ansible.builtin.stat:
+    path: /etc/apt/sources.list
+  register: file_stat
+
+- name: Move sources.list file to tmp
+  ansible.builtin.shell: mv /etc/apt/sources.list /tmp/
+  when: file_stat.stat.exists
+
+- name: Download repofile
+  ansible.builtin.get_url:
+    url: "{{ reposerver_ubuntu }}/{{ item }}"
+    dest: "/etc/apt/sources.list.d/{{ item }}"
+    mode: '0644'
+  loop: "{{ repo.file.ubuntu }}"

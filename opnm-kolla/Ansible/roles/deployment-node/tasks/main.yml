@@ -1,0 +1,62 @@
+- name: Install the ansible and kolla-ansible packages
+  ansible.builtin.pip:
+    name:
+    - ansible==2.10
+    - kolla-ansible==13.7.0
+
+- name: Copy the pem fie
+  ansible.builtin.copy:
+    src: multinode.pem
+    dest: /root/
+    mode: '0600' #noqa
+
+- name: Check ansible directory exist or not
+  ansible.builtin.stat:
+    path: /etc/ansible
+  register: file_stat
+
+- name: If not exist then Create the ansible directory
+  ansible.builtin.file:
+    path: /etc/ansible
+    state: directory
+  when: not file_stat.stat.exists
+
+- name: Copy the ansible.cfg file
+  ansible.builtin.copy:
+    src: ansible.cfg
+    dest: /etc/ansible
+    mode: '0644' #noqa
+  when: not file_stat.stat.exists
+
+- name: Take the backup of ansible.cfg
+  ansible.builtin.copy:
+    remote_src: true
+    src: /etc/ansible/ansible.cfg
+    dest: /etc/ansible/ansible.cfg-bkp
+  when: file_stat.stat.exists
+
+- name: Add custom settings in ansible.cfg
+  lineinfile:
+    path: /etc/ansible/ansible.cfg
+    regexp: '^\[defaults\]'
+    insertafter: '^\[defaults\]'
+    line: |
+      [defaults]
+      host_key_checking = False
+      pipelining = True
+      forks = 30
+      gathering = smart
+      fact_caching = jsonfile
+      fact_caching_connection = /root/ansible-facts
+      fact_caching_timeout = 0
+      timeout = 60
+  when: file_stat.stat.exists
+
+- name: copy the docker rigistory
+  ansible.builtin.copy:
+    src: registry.tar
+    dest: /tmp/
+
+- name: load the docker registry.tar
+  ansible.builtin.shell: docker load -i /tmp/registry.tar && docker tag 4bb5ea59f8e0 registry:latest
+
